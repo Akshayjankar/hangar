@@ -1,0 +1,143 @@
+/**
+ * HANGAR DESIGN SYSTEM TOKENS
+ * Concept: Calm, premium Flight-Operations Control Room
+ * Themes: Dark (Hero - Cockpit Navy) & Light (Technical Drafting Paper)
+ */
+
+:root {
+  /* ============================================================
+     LIGHT THEME: "Technical Drafting Paper"
+     ============================================================ */
+  --bg: #EDF2F6;
+  --bg-elevated: #F7FAFC;
+  --surface: #FFFFFF;
+  --surface-hover: #F2F6F9;
+  --surface-2: #E2EBF0;
+  --border: #C0CED9;
+  --line: #C0CED9;
+
+  --text: #0B1B2B;
+  --text-muted: #566D80;
+  --muted: #566D80;
+
+  /* Primary action / focal contrast */
+  --primary: #0B1B2B;
+  --primary-text: #FFFFFF;
+
+  /* Brand Accent: Avionics Cyan / Aero Blue */
+  --accent: #0088A3;
+  --accent-contrast: #FFFFFF;
+  --accent-glow: rgba(0, 136, 163, 0.25);
+
+  /* Semantic Status Indicators */
+  --status-running: #098A60;
+  --status-starting: #B26A00;
+  --status-stopped: #D32F42;
+  --status-idle: #647B8F;
+
+  /* Backward-compatible status aliases */
+  --run: #098A60;
+  --run-text: #076B4B;
+  --start: #0277BD;
+  --start-text: #01579B;
+  --warn: #B26A00;
+  --warn-text: #8C5300;
+  --err: #D32F42;
+  --err-text: #B71C1C;
+  --off: #647B8F;
+  --off-text: #566D80;
+
+  /* Runway grid & beacon lights */
+  --grid-line: rgba(11, 27, 43, 0.04);
+  --radial-glow: radial-gradient(circle at 50% 0%, rgba(0, 136, 163, 0.04), transparent 60%);
+  --lamp-glow-run: none;
+  --lamp-glow-start: none;
+  --lamp-glow-warn: none;
+  --lamp-glow-err: none;
+  --lamp-ring: 0 0 0 1.5px rgba(11, 27, 43, 0.25);
+
+  /* Spacing Scale (8px system) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(11, 27, 43, 0.06);
+  --shadow-md: 0 4px 12px rgba(11, 27, 43, 0.08);
+  --shadow-lg: 0 12px 32px rgba(11, 27, 43, 0.12);
+
+  /* Fonts */
+  --font-display: 'Bricolage Grotesque Variable', -apple-system, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
+}
+
+.dark {
+  /* ============================================================
+     DARK THEME: "Flight-Operations Cockpit Navy" (Hero)
+     ============================================================ */
+  --bg: #06111C;
+  --bg-elevated: #081726;
+  --surface: #0A2036;
+  --surface-hover: #0F2A45;
+  --surface-2: #143555;
+  --border: #1E3F61;
+  --line: #1E3F61;
+
+  --text: #E8F1F8;
+  --text-muted: #8AA7BF;
+  --muted: #8AA7BF;
+
+  /* Primary action / focal contrast */
+  --primary: #E8F1F8;
+  --primary-text: #06111C;
+
+  /* Brand Accent: Electric Avionics Cyan */
+  --accent: #00E5FF;
+  --accent-contrast: #06111C;
+  --accent-glow: rgba(0, 229, 255, 0.25);
+
+  /* Semantic Status Indicators */
+  --status-running: #00F090;
+  --status-starting: #FFB300;
+  --status-stopped: #FF3B5C;
+  --status-idle: #5C748A;
+
+  /* Backward-compatible status aliases */
+  --run: #00F090;
+  --run-text: #00F090;
+  --start: #00E5FF;
+  --start-text: #00E5FF;
+  --warn: #FFB300;
+  --warn-text: #FFB300;
+  --err: #FF3B5C;
+  --err-text: #FF3B5C;
+  --off: #5C748A;
+  --off-text: #8AA7BF;
+
+  /* Runway grid & beacon lights */
+  --grid-line: rgba(0, 229, 255, 0.035);
+  --radial-glow: radial-gradient(circle at 50% 0%, rgba(0, 229, 255, 0.08), transparent 70%);
+  --lamp-glow-run: 0 0 10px rgba(0, 240, 144, 0.7);
+  --lamp-glow-start: 0 0 10px rgba(0, 229, 255, 0.7);
+  --lamp-glow-warn: 0 0 10px rgba(255, 179, 0, 0.7);
+  --lamp-glow-err: 0 0 10px rgba(255, 59, 92, 0.7);
+  --lamp-ring: none;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.65);
+}
+

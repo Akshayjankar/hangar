@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <title>Hangar</title>
+  <!-- Fuselage -->
+  <path d="M24 6L28 28H20L24 6Z" fill="#1E293B" stroke="#1E293B" stroke-width="1" stroke-linejoin="round"/>
+  <!-- Main swept wings -->
+  <path d="M24 20L42 32L38 34L24 26L10 34L6 32L24 20Z" fill="#00E5FF" stroke="#00E5FF" stroke-width="0.5" stroke-linejoin="round"/>
+  <!-- Tail fins -->
+  <path d="M24 28L32 38L28 38L24 32L20 38L16 38L24 28Z" fill="#1E293B" stroke="#1E293B" stroke-width="0.5" stroke-linejoin="round"/>
+  <!-- Nose tip -->
+  <circle cx="24" cy="6" r="1.5" fill="#00E5FF"/>
+</svg>

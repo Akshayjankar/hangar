@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <title>Hangar Logo Alternative 1 (H-Monogram)</title>
+  <!-- Left Runway Vertical Pylon -->
+  <line x1="12" y1="6" x2="12" y2="42" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Right Runway Vertical Pylon -->
+  <line x1="36" y1="6" x2="36" y2="42" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Arching Crossbeam forming the letter H -->
+  <path d="M12 24C16 18 32 18 36 24" stroke="#00E5FF" stroke-width="3.5" stroke-linecap="round" />
+  <line x1="12" y1="28" x2="36" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 3" />
+  <!-- Center beacon dot -->
+  <circle cx="24" cy="14" r="2.5" fill="#00E5FF" />
+</svg>
+

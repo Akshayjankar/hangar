@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hangar Logo System - Visual Matrix</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #06111C;
+      color: #E8F1F8;
+      padding: 40px 24px;
+      line-height: 1.5;
+    }
+    .header { max-width: 1200px; margin: 0 auto 32px auto; }
+    .header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+    .header p { color: #8DAFC8; font-size: 14px; margin-top: 4px; }
+    
+    .section-title {
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #00E5FF;
+      margin: 40px 0 16px 0;
+      font-weight: 700;
+      border-bottom: 1px solid #1E3A54;
+      padding-bottom: 8px;
+    }
+    
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .card {
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid transparent;
+    }
+    
+    .card-dark {
+      background: #0A2036;
+      border-color: #1E3A54;
+      color: #E8F1F8;
+    }
+    
+    .card-light {
+      background: #EDF2F6;
+      border-color: #B7C5CF;
+      color: #0C2237;
+    }
+    
+    .card-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.75;
+      width: 100%;
+      text-align: left;
+    }
+
+    .sizes-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      margin: 12px 0;
+    }
+
+    .size-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .size-label {
+      font-size: 10px;
+      font-family: monospace;
+      opacity: 0.6;
+    }
+
+    img.hero-preview {
+      width: 100%;
+      max-width: 256px;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Hangar Brand Identity</h1>
+    <p>Vector Logo System & Multi-Resolution Display Matrix</p>
+  </div>
+
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <!-- CONCEPT A -->
+    <div class="section-title">Concept A: Primary Logo (Hangar Arch + Supersonic Delta)</div>
+    <div class="matrix-grid">
+      <div class="card card-dark">
+        <div class="card-label">Dark Theme • Full Logo</div>
+        <img src="hangar-logo-full.svg" style="width: 240px; height: 54px;" alt="Hangar Full Logo Dark" />
+        <div class="card-label" style="margin-top: 16px;">Icon Resolution Scale</div>
+        <div class="sizes-row">
+          <div class="size-item"><img src="hangar-logo-mark.svg" width="16" height="16" alt="16px" /><span class="size-label">16px</span></div>
+          <div class="size-item"><img src="hangar-logo-mark.svg" width="32" height="32" alt="32px" /><span class="size-label">32px</span></div>
+          <div class="size-item"><img src="hangar-logo-mark.svg" width="64" height="64" alt="64px" /><span class="size-label">64px</span></div>
+          <div class="size-item"><img src="hangar-logo-mark.svg" width="96" height="96" alt="96px" /><span class="size-label">96px</span></div>
+        </div>
+      </div>
+
+      <div class="card card-light">
+        <div class="card-label">Light Theme • Full Logo</div>
+        <img src="hangar-logo-full.svg" style="width: 240px; height: 54px;" alt="Hangar Full Logo Light" />
+        <div class="card-label" style="margin-top: 16px;">Icon Resolution Scale</div>
+        <div class="sizes-row">
+          <div class="size-item"><img src="hangar-logo-mark.svg" width="16" height="16" alt="16px" /><span class="size-label">16px</span></div>
+          <div class="size-item"><img src="hangar-logo-mark.svg" width="32" height="32" alt="32px" /><span class="size-label">32px</span></div>
+          <div class="size-item"><img src="hangar-logo-mark.svg" width="64" height="64" alt="64px" /><span class="size-label">64px</span></div>
+          <div class="size-item"><img src="hangar-logo-mark.svg" width="96" height="96" alt="96px" /><span class="size-label">96px</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MONOCHROME & HERO -->
+    <div class="section-title">Monochrome Variant & 256px Display</div>
+    <div class="matrix-grid">
+      <div class="card card-dark">
+        <div class="card-label">Dark Surface • Single Color Mono (256px)</div>
+        <img src="hangar-logo-mono.svg" class="hero-preview" alt="Mono Dark" />
+      </div>
+
+      <div class="card card-light">
+        <div class="card-label">Light Surface • Single Color Mono (256px)</div>
+        <img src="hangar-logo-mono.svg" class="hero-preview" alt="Mono Light" />
+      </div>
+    </div>
+
+    <!-- ALTERNATIVES -->
+    <div class="section-title">Alternative Concepts (B & C)</div>
+    <div class="matrix-grid">
+      <div class="card card-dark">
+        <div class="card-label">Concept B: H-Monogram (Arch + Runway Pylons)</div>
+        <img src="hangar-logo-alt-1.svg" width="128" height="128" alt="Alt 1" />
+      </div>
+
+      <div class="card card-dark">
+        <div class="card-label">Concept C: Control Tower Beacon over Runway</div>
+        <img src="hangar-logo-alt-2.svg" width="128" height="128" alt="Alt 2" />
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
