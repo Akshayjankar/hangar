@@ -62,6 +62,8 @@ out/
 *.pem
 *.key
 secrets/
+*.pat
+.credentials/
 
 # ── Hangar data & logs ────────────────────────────────────────────────────────
 # Hangar stores data at ~/.hangar/ (outside repo) but just in case:
