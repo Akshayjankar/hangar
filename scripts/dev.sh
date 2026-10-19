@@ -4,7 +4,7 @@ set -e
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export HANGAR_PORT="${HANGAR_PORT:-7777}"
 export PYTHONPATH="$ROOT_DIR/backend:$PYTHONPATH"
-export HANGAR_DEV_ORIGIN="http://localhost:3000"
+export HANGAR_DEV_ORIGIN="${HANGAR_DEV_ORIGIN:-http://localhost:3002}"
 export NEXT_PUBLIC_API_URL="http://127.0.0.1:${HANGAR_PORT}"
 export NEXT_PUBLIC_WS_URL="ws://127.0.0.1:${HANGAR_PORT}/ws"
 

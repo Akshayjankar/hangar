@@ -91,13 +91,13 @@ cd ..
 ```powershell
 # Windows
 $env:PYTHONPATH = "C:\path\to\Hangar\backend"
-$env:HANGAR_DEV_ORIGIN = "http://localhost:3000"
+$env:HANGAR_DEV_ORIGIN = "http://localhost:3002"
 python -m uvicorn hangar.main:app --reload --host 127.0.0.1 --port 7777
 ```
 
 ```bash
 # macOS / Linux
-PYTHONPATH=./backend HANGAR_DEV_ORIGIN=http://localhost:3000 \
+PYTHONPATH=./backend HANGAR_DEV_ORIGIN=http://localhost:3002 \
   uvicorn hangar.main:app --reload --host 127.0.0.1 --port 7777
 ```
 
@@ -119,7 +119,7 @@ NEXT_PUBLIC_API_URL=http://127.0.0.1:7777 \
   npm run dev
 ```
 
-Then open **http://localhost:3000** in your browser.
+Then open **http://localhost:3002** in your browser.
 
 ---
 
@@ -167,7 +167,7 @@ After the app is running, click **"Load samples"** in the header, or call:
 ```bash
 curl -X POST http://localhost:7777/api/samples/load \
   -H "X-Hangar-Client: 1" \
-  -H "Origin: http://localhost:3000"
+  -H "Origin: http://localhost:3002"
 ```
 
 This creates two demo projects:
@@ -181,7 +181,7 @@ This creates two demo projects:
 ### System Architecture
 
 ```
-Browser (http://localhost:3000 in dev / http://localhost:7777 in prod)
+Browser (http://localhost:3002 in dev / http://localhost:7777 in prod)
    │
    ├── REST API (/api/*)  ──────────────►  FastAPI  (127.0.0.1:7777)
    │                                          │
@@ -374,7 +374,7 @@ Open **Settings** (gear icon in the sidebar) to configure:
 
 | URL | Description |
 |---|---|
-| `http://localhost:3000` | Frontend dev server |
+| `http://localhost:3002` | Frontend dev server |
 | `http://localhost:7777` | Backend API + production frontend |
 | `http://localhost:7777/api/overview` | Overview endpoint |
 | `http://localhost:7777/api/applications` | List all registered apps |

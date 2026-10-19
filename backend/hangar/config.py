@@ -13,7 +13,7 @@ DEFAULT_PORT: int = 7777
 PORT: int = int(os.environ.get("HANGAR_PORT", str(DEFAULT_PORT)))
 
 # Allowed Origins & Host header validation
-DEV_ORIGIN: str = os.environ.get("HANGAR_DEV_ORIGIN", "http://localhost:3000")
+DEV_ORIGIN: str = os.environ.get("HANGAR_DEV_ORIGIN", "http://localhost:3002")
 ALLOWED_HOSTS: set[str] = {
     "localhost",
     "127.0.0.1",
@@ -28,7 +28,7 @@ ALLOWED_ORIGINS: set[str] = {
     f"http://127.0.0.1:{PORT}",
     f"http://[::1]:{PORT}",
     DEV_ORIGIN,
-    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3002",
 }
 
 # Storage paths

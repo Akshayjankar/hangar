@@ -10,7 +10,7 @@ from httpx import AsyncClient, ASGITransport
 temp_hangar_dir = tempfile.TemporaryDirectory()
 os.environ["HANGAR_HOME"] = temp_hangar_dir.name
 os.environ["HANGAR_PORT"] = "7777"
-os.environ["HANGAR_DEV_ORIGIN"] = "http://localhost:3000"
+os.environ["HANGAR_DEV_ORIGIN"] = "http://localhost:3002"
 
 from hangar.config import ensure_data_directories
 from hangar.db import close_db, init_db

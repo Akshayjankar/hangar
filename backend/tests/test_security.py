@@ -76,7 +76,7 @@ async def test_dev_origin_is_permitted():
             "/api/samples/load",
             headers={
                 "Host": "localhost:7777",
-                "Origin": "http://localhost:3000",
+                "Origin": "http://localhost:3002",
                 "X-Hangar-Client": "1",
             },
         )

@@ -16,7 +16,7 @@ Because local APIs can be targeted by malicious websites running in the user's b
    - Every mutating/non-GET request (POST, PUT, PATCH, DELETE) and WebSocket connection must contain the `X-Hangar-Client: 1` header.
    - Malicious web pages attempting `fetch()` cannot set custom headers cross-origin without triggering a browser CORS preflight.
    - Wildcard CORS (`*`) is prohibited.
-   - Allowed `Origin` values are strictly restricted to `http://localhost:7777`, `http://127.0.0.1:7777`, `http://[::1]:7777`, and `http://localhost:3000` (in dev mode).
+   - Allowed `Origin` values are strictly restricted to `http://localhost:7777`, `http://127.0.0.1:7777`, `http://[::1]:7777`, and `http://localhost:3002` (in dev mode).
    - Any request violating origin or header checks receives an immediate HTTP 403 Forbidden.
 
 3. **No Arbitrary Command Execution**:

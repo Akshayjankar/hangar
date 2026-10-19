@@ -55,7 +55,7 @@ Run frontend and backend simultaneously in hot-reloading dev mode:
 ./scripts/dev.sh
 ```
 
-Frontend runs on `http://localhost:3000` with API proxying to `http://127.0.0.1:7777`.
+Frontend runs on `http://localhost:3002` with API proxying to `http://127.0.0.1:7777`.
 
 ---
 

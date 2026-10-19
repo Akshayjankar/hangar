@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 $env:HANGAR_PORT = if ($env:HANGAR_PORT) { $env:HANGAR_PORT } else { "7777" }
 $env:PYTHONPATH = "$Root\backend"
-$env:HANGAR_DEV_ORIGIN = "http://localhost:3000"
+$env:HANGAR_DEV_ORIGIN = if ($env:HANGAR_DEV_ORIGIN) { $env:HANGAR_DEV_ORIGIN } else { "http://localhost:3002" }
 $env:NEXT_PUBLIC_API_URL = "http://127.0.0.1:$($env:HANGAR_PORT)"
 $env:NEXT_PUBLIC_WS_URL = "ws://127.0.0.1:$($env:HANGAR_PORT)/ws"
 
