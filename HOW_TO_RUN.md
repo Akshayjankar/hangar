@@ -1,80 +1,82 @@
-# Hangar — How to Run & How It Works
+# Hangar — How to Run (Simple Guide)
 
-> **Hangar** is a single-user localhost dashboard to register, start, stop, and monitor your local development projects — all from one screen.
+Hangar is a **control panel for your local projects**.
 
----
+You open it in the browser, add your projects (frontend, backend, database), and then you can:
 
-## Table of Contents
+- start / stop / restart them
+- see if they are healthy
+- read live logs
+- get alerts when something crashes
 
-1. [Prerequisites](#prerequisites)
-2. [Step-by-Step: Running the Project](#step-by-step-running-the-project)
-3. [How the Application Works](#how-the-application-works)
-4. [Adding an Application](#adding-an-application)
-5. [Where Do Applications Run?](#where-do-applications-run)
-6. [Starting, Stopping, and Restarting](#starting-stopping-and-restarting)
-7. [Logs](#logs)
-8. [Activity & Notifications](#activity--notifications)
-9. [Settings](#settings)
-10. [Architecture Overview](#architecture-overview)
+It runs only on **your computer** (`localhost`). It is not meant for the internet.
 
 ---
 
-## Prerequisites
+## What you need first
 
-| Requirement | Version | Notes |
+| Tool | Version | Why |
 |---|---|---|
-| Python | 3.11+ | Must be in system PATH |
-| Node.js | 18+ | For frontend dev server |
-| pip | any | Comes with Python |
-| npm | 9+ | Comes with Node.js |
-| Git | any | Optional, for version control |
+| Python | 3.11 or newer | Runs the Hangar backend |
+| Node.js | 18 or newer | Runs the Hangar UI in dev mode |
+| pip | any | Installs Python packages |
+| npm | 9 or newer | Installs frontend packages |
 
 ---
 
-## Step-by-Step: Running the Project
+## Quick idea: what Hangar does
 
-### 1. Clone / Download the Project
+Think of Hangar like a **dashboard for your local apps**.
+
+1. You register a project (for example: Shop).
+2. You add its parts (frontend, API, database).
+3. Hangar starts those parts for you with the commands you give.
+4. Hangar watches them, shows logs, and tells you if something fails.
+
+Important: Hangar does **not** change your project source code. It only stores Hangar’s own data and logs.
+
+---
+
+## How to run Hangar
+
+### Step 1 — Get the project
 
 ```bash
 git clone https://github.com/Akshayjankar/hangar.git
 cd hangar
 ```
 
-Or extract `Hanger_1810.zip` and open a terminal inside the `Hangar` folder.
+Or unzip the project folder and open a terminal inside it.
 
 ---
 
-### 2. Set Up the Python Virtual Environment
+### Step 2 — Create a Python virtual environment
 
-```bash
-# Windows (PowerShell)
+This keeps Hangar’s packages separate from your system Python.
+
+**Windows (PowerShell):**
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
 
-# macOS / Linux
+**macOS / Linux:**
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 ---
 
-### 3. Install Python Dependencies
+### Step 3 — Install backend packages
 
 ```bash
 pip install -r backend/requirements.lock
 ```
 
-Or using pyproject.toml:
-
-```bash
-cd backend
-pip install -e .
-cd ..
-```
-
 ---
 
-### 4. Install Frontend Dependencies
+### Step 4 — Install frontend packages
 
 ```bash
 cd frontend
@@ -84,48 +86,9 @@ cd ..
 
 ---
 
-### 5. Run in Development Mode (Two Terminals)
+### Step 5 — Start Hangar (easiest way)
 
-**Terminal 1 — Backend (FastAPI)**
-
-```powershell
-# Windows
-$env:PYTHONPATH = "C:\path\to\Hangar\backend"
-$env:HANGAR_DEV_ORIGIN = "http://localhost:3002"
-python -m uvicorn hangar.main:app --reload --host 127.0.0.1 --port 7777
-```
-
-```bash
-# macOS / Linux
-PYTHONPATH=./backend HANGAR_DEV_ORIGIN=http://localhost:3002 \
-  uvicorn hangar.main:app --reload --host 127.0.0.1 --port 7777
-```
-
-**Terminal 2 — Frontend (Next.js)**
-
-```powershell
-# Windows
-cd frontend
-$env:NEXT_PUBLIC_API_URL = "http://127.0.0.1:7777"
-$env:NEXT_PUBLIC_WS_URL  = "ws://127.0.0.1:7777/ws"
-npm run dev
-```
-
-```bash
-# macOS / Linux
-cd frontend
-NEXT_PUBLIC_API_URL=http://127.0.0.1:7777 \
-  NEXT_PUBLIC_WS_URL=ws://127.0.0.1:7777/ws \
-  npm run dev
-```
-
-Then open **http://localhost:3002** in your browser.
-
----
-
-### 6. Run using the Scripts (Recommended)
-
-Pre-built scripts handle both servers in one command:
+Use the ready-made script. It starts both backend and UI.
 
 **Windows:**
 ```powershell
@@ -137,248 +100,317 @@ Pre-built scripts handle both servers in one command:
 bash scripts/dev.sh
 ```
 
+Then open:
+
+- UI: **http://localhost:3002**
+- API: **http://127.0.0.1:7777**
+
+> Note: Hangar UI uses port **3002** so it does not clash with other apps on port 3000.
+
 ---
 
-### 7. Production Mode (Build + Serve)
+### Optional: start backend and UI in two terminals
 
-```powershell
-# Windows
-.\scripts\build.ps1
-.\scripts\start.ps1
-```
+**Terminal 1 — Backend**
 
 ```bash
 # macOS / Linux
-bash scripts/build.sh
-bash scripts/start.sh
+PYTHONPATH=./backend HANGAR_DEV_ORIGIN=http://localhost:3002 \
+  uvicorn hangar.main:app --reload --host 127.0.0.1 --port 7777
 ```
 
-This builds the Next.js static export and serves it directly from FastAPI at:
+```powershell
+# Windows
+$env:PYTHONPATH = "C:\path\to\Hangar\backend"
+$env:HANGAR_DEV_ORIGIN = "http://localhost:3002"
+python -m uvicorn hangar.main:app --reload --host 127.0.0.1 --port 7777
 ```
-http://localhost:7777
-```
 
----
-
-### 8. Load Sample Applications (Optional)
-
-After the app is running, click **"Load samples"** in the header, or call:
+**Terminal 2 — Frontend**
 
 ```bash
-curl -X POST http://localhost:7777/api/samples/load \
-  -H "X-Hangar-Client: 1" \
-  -H "Origin: http://localhost:3002"
+# macOS / Linux
+cd frontend
+NEXT_PUBLIC_API_URL=http://127.0.0.1:7777 \
+  NEXT_PUBLIC_WS_URL=ws://127.0.0.1:7777/ws \
+  npm run dev
 ```
+
+```powershell
+# Windows
+cd frontend
+$env:NEXT_PUBLIC_API_URL = "http://127.0.0.1:7777"
+$env:NEXT_PUBLIC_WS_URL  = "ws://127.0.0.1:7777/ws"
+npm run dev
+```
+
+Open **http://localhost:3002**.
+
+---
+
+## Production-style start (API only on 7777)
+
+The backend serves **API only**. The UI always runs separately on port **3002**.
+
+**Windows:**
+```powershell
+.\scripts\start.ps1
+# in another terminal:
+cd frontend
+npm run start
+```
+
+**macOS / Linux:**
+```bash
+bash scripts/start.sh
+# in another terminal:
+cd frontend && npm run start
+```
+
+Or:
+
+```bash
+python -m hangar
+```
+
+Then open the UI at **http://localhost:3002** (API stays at **http://localhost:7777**).
+
+---
+
+## Try it with sample apps
+
+After Hangar is running, click **Load samples** in the UI.
 
 This creates two demo projects:
-- **Sample Shop** — web (4101), API (4102), DB (4103)
-- **Sample Blog** — web (4111), API (4112), DB (sqlite file)
+
+- **Sample Shop** — web `:4101`, API `:4102`, fake DB `:4103`
+- **Sample Blog** — web `:4111`, API `:4112`, sqlite DB check
+
+These are great for learning how start/stop, logs, and crash events look.
 
 ---
 
-## How the Application Works
+## Add your own project
 
-### System Architecture
+1. Click **Add application**.
+2. Enter a name and your project folder path.
+3. Add components (parts of the project), for example:
+   - Frontend: `npm run dev`
+   - Backend: `uvicorn main:app --reload --port 8000`
+   - Database: your DB start command (or Docker command)
+4. Set the port if the service listens on one.
+5. Save.
 
-```
-Browser (http://localhost:3002 in dev / http://localhost:7777 in prod)
-   │
-   ├── REST API (/api/*)  ──────────────►  FastAPI  (127.0.0.1:7777)
-   │                                          │
-   └── WebSocket (/ws)  ─────────────────────┤
-                                              ├─ Supervisor    → spawns & tracks child processes
-                                              ├─ Health Checker → TCP / HTTP / process probes
-                                              ├─ Log Tailer    → reads log files, streams over WS
-                                              ├─ Metrics       → CPU, RSS samples every 2s
-                                              ├─ Events Engine → crash / start / stop events
-                                              └─ SQLite DB     → ~/.hangar/hangar.db
-```
+Your project now shows up on the dashboard as **Stopped**. Use the switch to start it.
 
-### Data Storage
+Tip: you can also use **Detect from folder**. Hangar looks at your folder and suggests components.
 
-Hangar stores all its data in **`~/.hangar/`** (your user home directory):
+---
 
-| Path | Contents |
+## Where Hangar runs your commands (and how)
+
+After you save an application, Hangar does **not** run anything yet. It only stores your settings.
+
+When you click **Start** (or flip a component switch), Hangar runs the **start command you typed**, on **your computer**, like this:
+
+### 1. Where it runs
+
+| Setting you filled | What Hangar does with it |
 |---|---|
-| `~/.hangar/hangar.db` | SQLite database: all apps, components, runs, events, metrics, settings |
-| `~/.hangar/logs/<component_id>/run-<run_id>.log` | Live stdout+stderr output from each process run |
+| **Working directory (cwd)** | Hangar `cd`s into this folder first, then runs the command there |
+| **Start command** | Exact shell command Hangar runs (example: `npm run dev`) |
+| **Port** (optional) | Hangar also sets env var `PORT` to that value |
+| **Env** (optional) | Extra environment variables merged on top of your normal OS env |
 
-> **Your project source code is never touched.** Hangar only stores its own metadata and log copies.
+So if your backend cwd is `/Users/you/shop/api` and start command is `uvicorn main:app --port 8000`, Hangar effectively does the same idea as:
 
----
-
-## Adding an Application
-
-1. Click **"Add application"** in the top-right header.
-2. Fill in the form:
-   - **Name** — display name (e.g. *My Shop*)
-   - **Description** — optional short description
-   - **Project folder** — the root path of your project on disk
-   - **Tags** — optional tags for filtering
-3. Add one or more **Components** (e.g. Frontend, Backend, Database):
-   - **Name** — component label (e.g. *shop-api*)
-   - **Kind** — `frontend`, `backend`, `database`, or `worker`
-   - **Working directory** — where to run the command from
-   - **Start command** — e.g. `npm run dev` or `uvicorn main:app --reload --port 8000`
-   - **Stop command** — optional; if blank, Hangar kills the process tree
-   - **Port** — the port the component listens on (used for health checks and status)
-   - **Health check type** — TCP (default), HTTP GET, or process-alive
-4. Click **Save and register**.
-
-The application appears immediately in the dashboard. Its status starts as **Stopped**.
-
----
-
-## Where Do Applications Run?
-
-- **Applications run on your local machine**, in their own **project folder** (the `cwd` you configured).
-- Hangar spawns each component as a **child process** — it does not use Docker, SSH, or any containers (unless you set a Docker command yourself).
-- All child processes are started in their **own process group** so Hangar can stop the entire tree (including child spawns) cleanly.
-- Child process stdout and stderr are **merged and written directly to a log file** on disk:
-  ```
-  ~/.hangar/logs/<component_id>/run-<run_id>.log
-  ```
-  This means logs survive Hangar restarts.
-
-### Component Lifecycle
-
-```
-[Stopped] → click Start → [Starting] → health check passes → [Running]
-                                     → grace period expires  → [Unhealthy]
-                                     → process exits         → [Crashed]
-[Running] → click Stop  → [Stopping] → process killed        → [Stopped]
-[Crashed] → autorestart on → retries with backoff (1s → 2s → 4s → 8s → 16s)
-                          → max restarts hit → [Restart Loop] event raised
+```bash
+cd /Users/you/shop/api
+uvicorn main:app --port 8000
 ```
 
-### Ordered vs Parallel Start
+Your project source code stays in that folder. Hangar does not copy or rewrite it.
 
-When you click **"Start all"** on a project:
-- **Ordered mode** (default): Hangar starts components tier by tier —
-  - Tier 1: Databases first (must be healthy before next tier)
-  - Tier 2: Backends and workers
-  - Tier 3: Frontends last
-- **Parallel mode**: all components start at once.
+### 2. How it starts the process
+
+1. Checks the working folder exists and the start command is not empty.
+2. If a port is set, checks that port is free. If something else owns it, start fails with a clear “port in use” message.
+3. Opens a new log file for this run under `~/.hangar/logs/<component_id>/run-<run_id>.log`.
+4. Starts the command in the **background** through the system shell (no popup terminal window):
+   - macOS / Linux: `/bin/sh -c "<your start command>"`
+   - Windows: `cmd.exe /s /c "<your start command>"`  
+     (`cmd.exe` is only the runner Hangar uses behind the scenes — it does **not** open a Command Prompt window on your desktop)
+5. Puts the process in its **own process group**, so Hangar can stop the whole tree later (parent + children).
+6. Sends **stdout + stderr** into that log file (merged). You read this in Hangar **Logs**, not in a separate terminal.
+7. Watches health (TCP / HTTP / process / file, based on what you configured).
+8. When health passes → status becomes **Running**. If not in time → **Unhealthy**. If the process exits → **Crashed**.
+
+Hangar also injects:
+
+- `PYTHONUNBUFFERED=1` (so Python logs show up quickly)
+- `PORT=<your port>` when a port is configured
+
+### 3. How it stops the process
+
+When you click **Stop**:
+
+1. If you set a **stop command** (example: `docker compose stop db`), Hangar runs that first.
+2. If not, Hangar asks the process tree to terminate, waits a few seconds, then force-kills anything left.
+3. It checks the port is free, then marks the component **Stopped**.
+
+### 4. What Hangar stores vs what your app uses
+
+| Location | Who owns it | Purpose |
+|---|---|---|
+| Your project folder | You | Real app code and configs |
+| `~/.hangar/hangar.db` | Hangar | Saved apps, commands, runs, events, settings |
+| `~/.hangar/logs/...` | Hangar | Copied process output for live + past logs |
+
+Simple rule: **commands run in your project folder; Hangar only keeps metadata and logs in `~/.hangar/`.**
 
 ---
 
-## Starting, Stopping, and Restarting
+## Start, stop, restart — simple controls
 
-| Action | How |
+| What you want | What to click |
 |---|---|
-| Start a single component | Click the **toggle switch** next to a component in the project card |
-| Stop a single component | Click the toggle switch again (slide it off) |
-| Restart a single component | Click the **Restart** button next to a component |
-| Start all components | Click **Start** in the project card header |
-| Stop all components | Click **Stop** in the project card header |
-| Start all favourites | Click **Start favourites** on the Overview page |
-| Start all projects | Click **Start all** on the Overview page |
+| Start one service | Toggle switch on that row |
+| Stop one service | Toggle switch again |
+| Restart one service | Restart button |
+| Start whole project | Start all on the project card |
+| Stop whole project | Stop all on the project card |
 
-### Process Stopping
+### Start order (when using Start all)
 
-When you stop a component, Hangar:
-1. Runs the **stop command** if one was configured (e.g. `docker compose stop`)
-2. Otherwise, terminates the **entire process tree** (all children, grandchildren, etc.)
-3. Waits up to 5 seconds for graceful shutdown
-4. Force-kills anything remaining (`SIGKILL` on POSIX, `taskkill /T /F` on Windows)
-5. Verifies the port is free before marking the component as stopped
+By default Hangar starts in a safe order:
+
+1. Database first
+2. Backend / workers next
+3. Frontend last
+
+It waits for each step to become healthy before moving on.
+
+---
+
+## What the status lights mean
+
+| Status | Meaning |
+|---|---|
+| Stopped | Not running |
+| Starting | Command launched, waiting to become healthy |
+| Running | Healthy and up |
+| Stopping | Shutting down |
+| Unhealthy | Process is up, but health check failed |
+| Crashed | Process exited unexpectedly |
+| Failed | Could not start (bad command, busy port, etc.) |
 
 ---
 
 ## Logs
 
-- Navigate to the **Logs** tab in the sidebar.
-- Select a component from the dropdown.
-- Logs stream live as the process writes to its log file (200ms polling).
-- Use **Follow** to auto-scroll to the latest output.
-- Use **Copy** or **Download** to export logs.
-- Use **Clear** to remove the log file for the current run.
+Open the **Logs** page to:
 
-Logs are coloured by ANSI escape codes that the process itself emits (e.g. Next.js, uvicorn, Django, etc. all colour their own output).
+- watch live output
+- search lines
+- follow latest output
+- copy / download logs
+- open older runs
 
----
-
-## Activity & Notifications
-
-- The **Activity** tab shows a timestamped timeline of all system events.
-- Events include: started, stopped, restarted, crashed, unhealthy, recovered, port conflict, restart loop, high CPU, high memory.
-- Each crash event shows the last 20 log lines directly in the timeline.
-- **Toast notifications** appear in the bottom-right for errors and warnings.
-- Click the **bell icon** in the top-right to see the latest 8 events.
+Logs are saved per run, so they remain after Hangar restarts.
 
 ---
 
-## Settings
+## Activity and alerts
 
-Open **Settings** (gear icon in the sidebar) to configure:
+The **Activity** page is Hangar’s event history.
 
-| Setting | Default | Description |
-|---|---|---|
-| Theme | System | Light / Dark / System |
-| On exit | Leave running | Whether to stop child processes when Hangar closes |
-| Health interval | 5s | How often to probe each component |
-| Startup grace | 30s | How long to wait for a health check before marking unhealthy |
-| Log retention | 10 runs / 500 MB | How many past run log files to keep |
-| CPU alert threshold | 90% | Event raised when a component exceeds this CPU% |
-| Memory alert threshold | 1024 MB | Event raised when a component exceeds this RSS |
-| Autorestart default | true | Whether new components autorestart on crash by default |
+You will see things like:
+
+- started / stopped / restarted
+- crash
+- unhealthy
+- port conflict
+- restart loop
+- high CPU / high memory
+
+Crash events also show the last log lines, so you can see what went wrong quickly.
+
+Toasts appear for warnings and errors. The bell icon shows recent alerts.
 
 ---
 
-## Architecture Overview
+## Settings you may care about
 
-### Backend (`backend/hangar/`)
-
-| Module | Role |
+| Setting | Simple meaning |
 |---|---|
-| `main.py` | FastAPI app, mounts all routers, serves static files |
-| `config.py` | Paths (`HANGAR_HOME`, `LOGS_DIR`), port, name constants |
-| `security.py` | Host / Origin / X-Hangar-Client middleware — blocks DNS rebinding |
-| `db.py` | SQLAlchemy async engine, session factory, table creation |
-| `models.py` | SQLAlchemy ORM models (Application, Component, Run, Event, Metric, Settings) |
-| `schemas.py` | Pydantic request/response schemas |
-| `core/supervisor.py` | Spawns and tracks child processes, handles adopt-on-restart |
-| `core/process.py` | Low-level process spawn with log file redirection |
-| `core/orchestrator.py` | Ordered / parallel multi-component start/stop jobs |
-| `core/health.py` | TCP, HTTP, process, command, file health checks |
-| `core/logtail.py` | Follows active log files, pushes lines over WebSocket |
-| `core/metrics.py` | psutil CPU/RSS sampling, 2s live + 1-min DB persist |
-| `core/events.py` | Creates and broadcasts events (crash, start, stop, etc.) |
-| `core/bus.py` | In-process pub/sub bus connecting core modules to WS clients |
-| `core/ports.py` | Lists listening TCP ports, detects conflicts |
-| `core/detect.py` | Scans a folder depth-2 and suggests component configs |
-| `core/presets.py` | Built-in presets (Node dev, Uvicorn, Django, Docker Compose, etc.) |
-
-### Frontend (`frontend/src/`)
-
-| Path | Role |
-|---|---|
-| `app/layout.tsx` | Root layout with theme hydration |
-| `app/page.tsx` | Entry point — renders `<HangarDashboard>` |
-| `components/dashboard/HangarDashboard.tsx` | Main shell: state, WebSocket, tab routing |
-| `components/dashboard/ProjectCard.tsx` | Per-project rack unit with component rows and controls |
-| `components/dashboard/MasterControl.tsx` | Overview hero panel (Start all, Stop all, machine stats) |
-| `components/dashboard/LogViewer.tsx` | Log stream viewer with follow, copy, download |
-| `components/dashboard/EventsTimeline.tsx` | Activity timeline with crash log expansion |
-| `components/layout/Sidebar.tsx` | Navigation rail (Overview, Applications, Logs, Activity, Settings) |
-| `components/layout/Header.tsx` | Page title bar with search, Load samples, Add application |
-| `components/layout/CommandPalette.tsx` | Ctrl+K quick-access palette |
-| `components/ui/PowerSwitch.tsx` | The toggle+lamp component for each service |
-| `lib/api.ts` | All REST API call helpers |
-| `lib/ws.ts` | WebSocket client with reconnect backoff |
-| `lib/types.ts` | TypeScript interfaces for all domain objects |
+| Theme | Light / Dark / System |
+| On exit | Keep your apps running when Hangar closes, or stop them |
+| Startup grace | How long Hangar waits before saying “unhealthy” |
+| Health interval | How often Hangar checks each service |
+| Autorestart | Restart a crashed service automatically |
+| Log retention | How many old log files to keep |
 
 ---
 
-## Quick Reference: Key URLs
+## How the pieces talk to each other
 
-| URL | Description |
+```
+Your browser
+   │
+   ├── REST calls (/api/...) ──► Hangar backend (port 7777)
+   └── Live updates (WebSocket) ─► same backend
+
+Hangar backend then:
+   - starts/stops your processes
+   - checks health
+   - reads log files
+   - collects CPU/memory
+   - saves data in ~/.hangar/
+```
+
+In short:
+
+- **Frontend** = the screen you click
+- **Backend** = the engine that actually starts and watches processes
+
+---
+
+## Useful URLs
+
+| URL | What it is |
 |---|---|
-| `http://localhost:3002` | Frontend dev server |
-| `http://localhost:7777` | Backend API + production frontend |
-| `http://localhost:7777/api/overview` | Overview endpoint |
-| `http://localhost:7777/api/applications` | List all registered apps |
-| `ws://localhost:7777/ws` | WebSocket for live updates |
-| `~/.hangar/hangar.db` | SQLite database file |
-| `~/.hangar/logs/` | All component log files |
+| http://localhost:3002 | Hangar UI |
+| http://localhost:7777 | Hangar API only (JSON / `/api` / `/ws`) |
+| http://localhost:7777/api/overview | Overview data |
+| http://localhost:7777/api/applications | Your registered apps |
+| ws://127.0.0.1:7777/ws | Live updates |
 
+---
+
+## Safety notes (important)
+
+- Hangar binds to `127.0.0.1` only.
+- Do **not** expose it to a public network.
+- Never put secrets into chat, commits, or screenshots.
+
+---
+
+## Common problems
+
+**Port 3002 or 7777 already in use**  
+Stop the other app, or change Hangar’s port with env vars (`HANGAR_PORT`, frontend `-p` in `frontend/package.json`).
+
+**Frontend cannot talk to backend**  
+Make sure backend is running on `7777` and `HANGAR_DEV_ORIGIN` matches the UI origin (`http://localhost:3002`).
+
+**Start fails with “port in use”**  
+Something else already owns that port. Kill that process from the Ports/UI flow, or change the component port.
+
+**Command fails immediately**  
+Check working directory and start command. Open Logs for the exact error.
+
+---
+
+## One-line summary
+
+Hangar is your local “mission control” for starting, stopping, watching, and debugging your localhost projects from one simple screen.

@@ -6,7 +6,7 @@ import time
 import webbrowser
 import uvicorn
 
-from .config import APP_NAME, BIND_HOST, PORT, VERSION
+from .config import APP_NAME, BIND_HOST, DEV_ORIGIN, PORT, VERSION
 
 
 def open_browser(url: str, delay_s: float = 1.0) -> None:
@@ -30,7 +30,8 @@ def main() -> None:
     # Hard constraint: backend binds 127.0.0.1 and refuses to bind elsewhere
     host = BIND_HOST
     port = args.port
-    url = f"http://localhost:{port}"
+    api_url = f"http://localhost:{port}"
+    ui_url = DEV_ORIGIN
 
     if hasattr(sys.stdout, "reconfigure"):
         try:
@@ -41,12 +42,13 @@ def main() -> None:
     print(f"\n=======================================================")
     print(f"  [+] {APP_NAME} v{VERSION}")
     print(f"  Localhost Control Panel")
-    print(f"  URL: {url}")
-    print(f"  Local Binding: {host}:{port}")
+    print(f"  API: {api_url}")
+    print(f"  UI:  {ui_url}")
+    print(f"  Local Binding: {host}:{port} (API only)")
     print(f"=======================================================\n")
 
     if not args.no_browser:
-        open_browser(url)
+        open_browser(ui_url)
 
     uvicorn.run(
         "hangar.main:app",

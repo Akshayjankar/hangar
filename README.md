@@ -32,14 +32,11 @@ Hangar is a single-user dashboard running on your local machine to register, mon
 pip install -r backend/requirements.lock
 npm ci --prefix frontend
 
-# 2. Build the frontend
-npm run build --prefix frontend
-
-# 3. Launch Hangar
-python -m hangar
+# 2. Start API (port 7777) and UI (port 3002)
+bash scripts/dev.sh   # or scripts/dev.ps1 on Windows
 ```
 
-Open `http://localhost:7777` in your browser.
+Open `http://localhost:3002` in your browser. The backend on `7777` is API-only.
 
 ---
 

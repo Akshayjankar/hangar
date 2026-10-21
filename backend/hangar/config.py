@@ -40,9 +40,6 @@ LOGS_DIR: Path = HANGAR_HOME / "logs"
 # Demo data flag
 DEMO_HISTORY: bool = bool(int(os.environ.get("HANGAR_DEMO_HISTORY", "0")))
 
-# Static files directory for Next.js exported frontend
-STATIC_DIR: Path = Path(__file__).resolve().parent.parent.parent / "frontend" / "out"
-
 # Default settings
 DEFAULT_SHELL: str = "cmd.exe" if sys.platform == "win32" else "/bin/sh"
 
