@@ -194,16 +194,16 @@ These are great for learning how start/stop, logs, and crash events look.
 
 1. Click **Add application**.
 2. Enter a name and your project folder path.
-3. Add components (parts of the project), for example:
-   - Frontend: `npm run dev`
-   - Backend: `uvicorn main:app --reload --port 8000`
-   - Database: your DB start command (or Docker command)
-4. Set the port if the service listens on one.
-5. Save.
+3. The form opens with three component slots ready: **Database**, **Backend**, and **Frontend**.
+4. Fill each one (or remove what you do not need; use the buttons to add more):
+   - **Database** — e.g. `docker compose up -d db` (tier 1)
+   - **Backend** — e.g. `uvicorn main:app --reload --port 8000` (tier 2)
+   - **Frontend** — e.g. `npm run dev` (tier 3)
+5. For each component, set name, start command, optional working directory, port, and health check.
+6. Choose **Start mode**: Ordered (db → backend → frontend) or Parallel.
+7. Click **Save and register**.
 
-Your project now shows up on the dashboard as **Stopped**. Use the switch to start it.
-
-Tip: you can also use **Detect from folder**. Hangar looks at your folder and suggests components.
+Your project now shows up on the dashboard as **Stopped**. Use **Start all** to run components in order, or toggle one service at a time.
 
 ---
 

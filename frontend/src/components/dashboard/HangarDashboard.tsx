@@ -12,6 +12,10 @@ import {
   Activity,
   Layers,
   HeartPulse,
+  Trash2,
+  Database,
+  Globe,
+  Cog,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -54,6 +58,58 @@ import {
 import type { Application, EventItem, OverviewData, Settings as HangarSettings } from "@/lib/types";
 import { wsClient } from "@/lib/ws";
 
+type DraftKind = "backend" | "frontend" | "database" | "worker";
+type DraftHealth = "tcp" | "http" | "process";
+
+type DraftComponent = {
+  key: string;
+  name: string;
+  kind: DraftKind;
+  cwd: string;
+  startCmd: string;
+  stopCmd: string;
+  port: string;
+  healthType: DraftHealth;
+  tier: number;
+  autorestart: boolean;
+};
+
+function defaultTierForKind(kind: DraftKind): number {
+  if (kind === "database") return 1;
+  if (kind === "frontend") return 3;
+  return 2;
+}
+
+function newDraftComponent(kind: DraftKind = "backend"): DraftComponent {
+  const labels: Record<DraftKind, string> = {
+    database: "db",
+    backend: "api",
+    frontend: "web",
+    worker: "worker",
+  };
+  return {
+    key: `${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    name: labels[kind],
+    kind,
+    cwd: "",
+    startCmd: "",
+    stopCmd: "",
+    port: "",
+    healthType: kind === "frontend" || kind === "backend" ? "tcp" : kind === "database" ? "tcp" : "process",
+    tier: defaultTierForKind(kind),
+    autorestart: true,
+  };
+}
+
+const emptyAddForm = {
+  name: "",
+  description: "",
+  path: "",
+  tags: "",
+  startMode: "ordered" as "ordered" | "parallel",
+  components: [] as DraftComponent[],
+};
+
 export function HangarDashboard() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [overview, setOverview] = useState<OverviewData | null>(null);
@@ -80,23 +136,7 @@ export function HangarDashboard() {
   // Search in Applications tab
   const [appSearch, setAppSearch] = useState("");
 
-  const [addForm, setAddForm] = useState({
-    name: "",
-    description: "",
-    path: "",
-    tags: "",
-    componentName: "",
-    kind: "backend" as "backend" | "frontend" | "database" | "worker",
-    cwd: "",
-    startCmd: "",
-    stopCmd: "",
-    port: "",
-    url: "",
-    tier: "2",
-    startOnLaunch: false,
-    autorestart: true,
-    healthType: "tcp" as "tcp" | "http" | "process" | "command" | "file",
-  });
+  const [addForm, setAddForm] = useState(emptyAddForm);
 
   const loadDashboard = useCallback(async () => {
     try {
@@ -380,36 +420,93 @@ export function HangarDashboard() {
     }
   };
 
+  const updateDraftComponent = (key: string, patch: Partial<DraftComponent>) => {
+    setAddForm((prev) => ({
+      ...prev,
+      components: prev.components.map((c) => (c.key === key ? { ...c, ...patch } : c)),
+    }));
+  };
+
+  const addDraftComponent = (kind: DraftKind = "backend") => {
+    setAddForm((prev) => ({
+      ...prev,
+      components: [...prev.components, newDraftComponent(kind)],
+    }));
+  };
+
+  const addTypicalStack = () => {
+    setAddForm((prev) => ({
+      ...prev,
+      components: [
+        newDraftComponent("database"),
+        newDraftComponent("backend"),
+        newDraftComponent("frontend"),
+      ],
+    }));
+  };
+
+  const removeDraftComponent = (key: string) => {
+    setAddForm((prev) => ({
+      ...prev,
+      components: prev.components.filter((c) => c.key !== key),
+    }));
+  };
+
+  const openAddDialog = () => {
+    setAddForm({
+      ...emptyAddForm,
+      components: [
+        newDraftComponent("database"),
+        newDraftComponent("backend"),
+        newDraftComponent("frontend"),
+      ],
+    });
+    setAddOpen(true);
+  };
+
   const handleCreateApplication = async () => {
-    if (!addForm.name.trim() || !addForm.path.trim() || !addForm.componentName.trim() || !addForm.startCmd.trim()) {
-      setError("Name, project path, component name, and start command are required.");
+    if (!addForm.name.trim() || !addForm.path.trim()) {
+      setError("Application name and project folder path are required.");
+      return;
+    }
+    if (addForm.components.length === 0) {
+      setError("Add at least one component (database, backend, or frontend).");
       return;
     }
 
-    const portNum = addForm.port.trim() ? Number(addForm.port.trim()) : null;
-    const urlStr = addForm.url.trim() || (portNum ? `http://localhost:${portNum}` : null);
+    for (const c of addForm.components) {
+      if (!c.name.trim() || !c.startCmd.trim()) {
+        setError(`Each component needs a name and start command (${c.kind}).`);
+        return;
+      }
+    }
 
-    const componentPayload = {
-      name: addForm.componentName.trim(),
-      kind: addForm.kind,
-      cwd: addForm.cwd.trim() || addForm.path.trim(),
-      start_cmd: addForm.startCmd.trim(),
-      stop_cmd: addForm.stopCmd.trim() || null,
-      env: {},
-      port: portNum,
-      url: urlStr,
-      health: {
-        type: addForm.healthType,
-        target: portNum ? String(portNum) : null,
-        interval_s: 5,
-        timeout_s: 3,
-        startup_grace_s: 30,
-      },
-      tier: Number(addForm.tier),
-      autorestart: addForm.autorestart,
-      max_restarts: 5,
-      start_on_launch: addForm.startOnLaunch,
-    };
+    const projectPath = addForm.path.trim();
+    const componentsPayload = addForm.components.map((c) => {
+      const portNum = c.port.trim() ? Number(c.port.trim()) : null;
+      const cwd = c.cwd.trim() || projectPath;
+      return {
+        name: c.name.trim(),
+        kind: c.kind,
+        cwd,
+        start_cmd: c.startCmd.trim(),
+        stop_cmd: c.stopCmd.trim() || null,
+        env: {},
+        port: portNum,
+        url: portNum ? `http://localhost:${portNum}` : null,
+        health: {
+          type: c.healthType,
+          target: portNum ? String(portNum) : null,
+          interval_s: 5,
+          timeout_s: 3,
+          startup_grace_s: 30,
+        },
+        tier: c.tier || defaultTierForKind(c.kind),
+        autorestart: c.autorestart,
+        max_restarts: 5,
+        start_on_launch: false,
+      };
+    });
 
     try {
       setError(null);
@@ -417,37 +514,21 @@ export function HangarDashboard() {
         name: addForm.name.trim(),
         description: addForm.description.trim(),
         icon: "Boxes",
-        path: addForm.path.trim(),
+        path: projectPath,
         tags: addForm.tags
           .split(",")
           .map((tag) => tag.trim())
           .filter(Boolean),
         favorite: false,
         sort: 0,
-        start_mode: "ordered",
-        components: [componentPayload],
+        start_mode: addForm.startMode,
+        components: componentsPayload,
       });
 
       setAddOpen(false);
-      setAddForm({
-        name: "",
-        description: "",
-        path: "",
-        tags: "",
-        componentName: "",
-        kind: "backend",
-        cwd: "",
-        startCmd: "",
-        stopCmd: "",
-        port: "",
-        url: "",
-        tier: "2",
-        startOnLaunch: false,
-        autorestart: true,
-        healthType: "tcp",
-      });
+      setAddForm(emptyAddForm);
       await loadDashboard();
-      showFeedback("Application created successfully!");
+      showFeedback(`Application created with ${componentsPayload.length} component(s).`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create application.");
     }
@@ -472,7 +553,7 @@ export function HangarDashboard() {
             activeTab={activeTab}
             onRefresh={loadDashboard}
             onLoadSamples={handleLoadSamples}
-            onAddOpen={() => setAddOpen(true)}
+            onAddOpen={openAddDialog}
             onOpenSearch={() => setCommandPaletteOpen(true)}
             theme={theme}
             onThemeChange={setTheme}
@@ -571,7 +652,7 @@ export function HangarDashboard() {
                     variant="secondary"
                     size="sm"
                     icon={<Plus className="h-3.5 w-3.5" />}
-                    onClick={() => setAddOpen(true)}
+                    onClick={openAddDialog}
                   >
                     Add bay
                   </Button>
@@ -609,7 +690,7 @@ export function HangarDashboard() {
                         {
                           label: "Add project",
                           icon: <Plus className="h-4 w-4" />,
-                          onClick: () => setAddOpen(true),
+                          onClick: openAddDialog,
                           variant: "secondary",
                         },
                       ]}
@@ -641,7 +722,7 @@ export function HangarDashboard() {
                   variant="primary"
                   size="sm"
                   icon={<Plus className="h-4 w-4" />}
-                  onClick={() => setAddOpen(true)}
+                  onClick={openAddDialog}
                 >
                   Add application
                 </Button>
@@ -793,7 +874,10 @@ export function HangarDashboard() {
 
           {/* Add Application Dialog */}
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
-            <DialogContent title="Add application" description="Register a local project and its primary component.">
+            <DialogContent
+              title="Add application"
+              description="Register a local project with database, backend, frontend, or worker components."
+            >
               <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="space-y-1 text-sm">
@@ -802,7 +886,7 @@ export function HangarDashboard() {
                       value={addForm.name}
                       onChange={(e) => setAddForm((c) => ({ ...c, name: e.target.value }))}
                       className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                      placeholder="e.g. Dummy Project"
+                      placeholder="e.g. My Shop"
                     />
                   </label>
                   <label className="space-y-1 text-sm">
@@ -811,19 +895,19 @@ export function HangarDashboard() {
                       value={addForm.path}
                       onChange={(e) => setAddForm((c) => ({ ...c, path: e.target.value }))}
                       className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                      placeholder="e.g. C:\Users\...\projects\dummy"
+                      placeholder="e.g. /Users/you/projects/shop"
                     />
                   </label>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <label className="space-y-1 text-sm">
                     <span className="text-[var(--text-muted)]">Description</span>
                     <input
                       value={addForm.description}
                       onChange={(e) => setAddForm((c) => ({ ...c, description: e.target.value }))}
                       className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                      placeholder="Brief note about this app"
+                      placeholder="Brief note"
                     />
                   </label>
                   <label className="space-y-1 text-sm">
@@ -832,72 +916,215 @@ export function HangarDashboard() {
                       value={addForm.tags}
                       onChange={(e) => setAddForm((c) => ({ ...c, tags: e.target.value }))}
                       className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                      placeholder="e.g. web, api, test"
+                      placeholder="web, api"
                     />
+                  </label>
+                  <label className="space-y-1 text-sm">
+                    <span className="text-[var(--text-muted)]">Start mode</span>
+                    <select
+                      value={addForm.startMode}
+                      onChange={(e) =>
+                        setAddForm((c) => ({
+                          ...c,
+                          startMode: e.target.value as "ordered" | "parallel",
+                        }))
+                      }
+                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                    >
+                      <option value="ordered">Ordered (db → backend → frontend)</option>
+                      <option value="parallel">Parallel (all at once)</option>
+                    </select>
                   </label>
                 </div>
 
-                <div className="pt-2 border-t border-[var(--border)]">
-                  <h4 className="text-sm font-bold mb-3 text-[var(--accent)]">Primary Component</h4>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <label className="space-y-1 text-sm sm:col-span-2">
-                      <span className="text-[var(--text-muted)]">Component name *</span>
-                      <input
-                        value={addForm.componentName}
-                        onChange={(e) => setAddForm((c) => ({ ...c, componentName: e.target.value }))}
-                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                        placeholder="e.g. dummy-server"
-                      />
-                    </label>
-                    <label className="space-y-1 text-sm">
-                      <span className="text-[var(--text-muted)]">Kind</span>
-                      <select
-                        value={addForm.kind}
-                        onChange={(e) => setAddForm((c) => ({ ...c, kind: e.target.value as any }))}
-                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                <div className="pt-2 border-t border-[var(--border)] space-y-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h4 className="text-sm font-bold text-[var(--accent)]">Components</h4>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        Add database, backend, and frontend here. Tier controls Start all order.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<Database className="h-3.5 w-3.5" />}
+                        onClick={() => addDraftComponent("database")}
                       >
-                        <option value="backend">Backend</option>
-                        <option value="frontend">Frontend</option>
-                        <option value="database">Database</option>
-                        <option value="worker">Worker</option>
-                      </select>
-                    </label>
+                        Database
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<Server className="h-3.5 w-3.5" />}
+                        onClick={() => addDraftComponent("backend")}
+                      >
+                        Backend
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<Globe className="h-3.5 w-3.5" />}
+                        onClick={() => addDraftComponent("frontend")}
+                      >
+                        Frontend
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<Cog className="h-3.5 w-3.5" />}
+                        onClick={() => addDraftComponent("worker")}
+                      >
+                        Worker
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={addTypicalStack}>
+                        Reset stack
+                      </Button>
+                    </div>
                   </div>
 
-                  <div className="mt-3 space-y-1 text-sm">
-                    <span className="text-[var(--text-muted)]">Start command *</span>
-                    <input
-                      value={addForm.startCmd}
-                      onChange={(e) => setAddForm((c) => ({ ...c, startCmd: e.target.value }))}
-                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] font-mono outline-none focus:border-[var(--accent)]"
-                      placeholder="e.g. python -m http.server 5050"
-                    />
-                  </div>
+                  {addForm.components.length === 0 && (
+                    <p className="text-xs text-[var(--text-muted)] rounded-xl border border-dashed border-[var(--border)] p-3">
+                      No components yet. Click Database / Backend / Frontend above, or Reset stack.
+                    </p>
+                  )}
 
-                  <div className="grid gap-3 sm:grid-cols-2 mt-3">
-                    <label className="space-y-1 text-sm">
-                      <span className="text-[var(--text-muted)]">Listening Port (optional)</span>
-                      <input
-                        type="number"
-                        value={addForm.port}
-                        onChange={(e) => setAddForm((c) => ({ ...c, port: e.target.value }))}
-                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                        placeholder="e.g. 5050"
-                      />
-                    </label>
-                    <label className="space-y-1 text-sm">
-                      <span className="text-[var(--text-muted)]">Health check type</span>
-                      <select
-                        value={addForm.healthType}
-                        onChange={(e) => setAddForm((c) => ({ ...c, healthType: e.target.value as any }))}
-                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                      >
-                        <option value="tcp">TCP port check</option>
-                        <option value="http">HTTP GET 200</option>
-                        <option value="process">Process alive</option>
-                      </select>
-                    </label>
-                  </div>
+                  {addForm.components.map((comp, index) => (
+                    <div
+                      key={comp.key}
+                      className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3 space-y-3"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold text-[var(--text-muted)]">
+                          Component {index + 1} · tier {comp.tier}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<Trash2 className="h-3.5 w-3.5" />}
+                          aria-label={`Remove ${comp.name || comp.kind}`}
+                          onClick={() => removeDraftComponent(comp.key)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <label className="space-y-1 text-sm sm:col-span-2">
+                          <span className="text-[var(--text-muted)]">Component name *</span>
+                          <input
+                            value={comp.name}
+                            onChange={(e) => updateDraftComponent(comp.key, { name: e.target.value })}
+                            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                            placeholder="e.g. shop-api"
+                          />
+                        </label>
+                        <label className="space-y-1 text-sm">
+                          <span className="text-[var(--text-muted)]">Kind</span>
+                          <select
+                            value={comp.kind}
+                            onChange={(e) => {
+                              const kind = e.target.value as DraftKind;
+                              updateDraftComponent(comp.key, {
+                                kind,
+                                tier: defaultTierForKind(kind),
+                              });
+                            }}
+                            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                          >
+                            <option value="database">Database</option>
+                            <option value="backend">Backend</option>
+                            <option value="frontend">Frontend</option>
+                            <option value="worker">Worker</option>
+                          </select>
+                        </label>
+                      </div>
+
+                      <label className="block space-y-1 text-sm">
+                        <span className="text-[var(--text-muted)]">
+                          Working directory (optional — defaults to project folder)
+                        </span>
+                        <input
+                          value={comp.cwd}
+                          onChange={(e) => updateDraftComponent(comp.key, { cwd: e.target.value })}
+                          className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--text)] font-mono text-xs outline-none focus:border-[var(--accent)]"
+                          placeholder="Leave blank to use project folder"
+                        />
+                      </label>
+
+                      <label className="block space-y-1 text-sm">
+                        <span className="text-[var(--text-muted)]">Start command *</span>
+                        <input
+                          value={comp.startCmd}
+                          onChange={(e) => updateDraftComponent(comp.key, { startCmd: e.target.value })}
+                          className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--text)] font-mono outline-none focus:border-[var(--accent)]"
+                          placeholder={
+                            comp.kind === "frontend"
+                              ? "e.g. npm run dev"
+                              : comp.kind === "backend"
+                                ? "e.g. uvicorn main:app --reload --port 8000"
+                                : comp.kind === "database"
+                                  ? "e.g. docker compose up -d db"
+                                  : "e.g. python worker.py"
+                          }
+                        />
+                      </label>
+
+                      <label className="block space-y-1 text-sm">
+                        <span className="text-[var(--text-muted)]">Stop command (optional)</span>
+                        <input
+                          value={comp.stopCmd}
+                          onChange={(e) => updateDraftComponent(comp.key, { stopCmd: e.target.value })}
+                          className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--text)] font-mono outline-none focus:border-[var(--accent)]"
+                          placeholder="e.g. docker compose stop db"
+                        />
+                      </label>
+
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <label className="space-y-1 text-sm">
+                          <span className="text-[var(--text-muted)]">Port (optional)</span>
+                          <input
+                            type="number"
+                            value={comp.port}
+                            onChange={(e) => updateDraftComponent(comp.key, { port: e.target.value })}
+                            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                            placeholder="e.g. 8000"
+                          />
+                        </label>
+                        <label className="space-y-1 text-sm">
+                          <span className="text-[var(--text-muted)]">Health check</span>
+                          <select
+                            value={comp.healthType}
+                            onChange={(e) =>
+                              updateDraftComponent(comp.key, {
+                                healthType: e.target.value as DraftHealth,
+                              })
+                            }
+                            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                          >
+                            <option value="tcp">TCP port check</option>
+                            <option value="http">HTTP GET 200</option>
+                            <option value="process">Process alive</option>
+                          </select>
+                        </label>
+                        <label className="space-y-1 text-sm">
+                          <span className="text-[var(--text-muted)]">Start tier</span>
+                          <select
+                            value={comp.tier}
+                            onChange={(e) =>
+                              updateDraftComponent(comp.key, { tier: Number(e.target.value) })
+                            }
+                            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                          >
+                            <option value={1}>1 — Database first</option>
+                            <option value={2}>2 — Backend / worker</option>
+                            <option value={3}>3 — Frontend last</option>
+                          </select>
+                        </label>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border)]">
